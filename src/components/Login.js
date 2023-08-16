@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Header from "../components/Header";
 
 export default function Login({onLogin}) {
   const [formValue, setFormValue] = useState({
@@ -18,12 +17,10 @@ export default function Login({onLogin}) {
   const handleSubmit = (e) => {
     e.preventDefault();
     onLogin(formValue.email, formValue.password);
-    setFormValue({email: '', password: ''});
   }
 
   return (
     <>
-      <Header redirectLink="/signup" redirectLinkText="Регистрация"/>
       <div className="auth">
         <h2 className="auth__title">Вход</h2>
         <form name="login"

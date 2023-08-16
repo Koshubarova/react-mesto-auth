@@ -1,7 +1,7 @@
 import logo from '../images/logo_Mesto.svg';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 
-function Header({redirectLink, redirectLinkText, isLoggedIn, SignOut, userEmail = ''}) {
+function Header({isLoggedIn, signOut, userEmail = ''}) {
 
   return (
     <header className="header">
@@ -11,11 +11,39 @@ function Header({redirectLink, redirectLinkText, isLoggedIn, SignOut, userEmail 
         className="header__logo"
       />
       <div className='header__account'>
-        <p className='header__mail'>{userEmail}</p>
-        <Link onClick={isLoggedIn ? SignOut : undefined}
+        {isLoggedIn && <p className="header__mail">{userEmail}</p>}
+        <Routes>
+        <Route
+            path="/"
+            element={isLoggedIn && (
+              <Link onClick={isLoggedIn ? signOut : undefined}
               className={`header__link ${isLoggedIn ? ' header__link_text_dim' : ''}`}
-              to={redirectLink}>{redirectLinkText}
-        </Link>
+              to="signin">
+                Выйти
+              </Link>
+            )} 
+          />
+          <Route
+            path="/signup"
+            element={
+              <Link to="/signin" className="header__link">
+                Войти
+              </Link>
+            }
+          />
+          <Route
+            path="/signin"
+            element={
+              <Link to="/signup" className="header__link">
+                Регистрация
+              </Link>
+            }
+          />
+          <Route
+            path="*"
+            element={<Navigate to={isLoggedIn ? "/" : "/signin"} />}
+          />
+          </Routes>
       </div>
     </header>
   )

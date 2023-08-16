@@ -1,14 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import Card from "./Card";
 import CurrentUserContext from "../contexts/CurrentUserContext";
-import Header from "../components/Header";
 
-function Main({onEditProfile, onEditAvatar, onAddPlace, onCardClick, cards, onCardLike, onCardDelete, isLoggedIn, userEmail}) {
+function Main({onEditProfile, onEditAvatar, onAddPlace, onCardClick, cards, onCardLike, onCardDelete}) {
   const currentUser = useContext(CurrentUserContext)
 
   return (
     <>
-      <Header isLoggedIn={isLoggedIn} redirectLink="/signin" redirectLinkText="Выйти" userEmail={userEmail}/>
       <main className="content">
         <section className="profile">
           <button

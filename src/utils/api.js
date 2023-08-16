@@ -79,50 +79,10 @@ class Api {
     })
     .then(this._checkResponse)
   }
-
-  register(email, password) {
-    return fetch(`${this._authUrl}/signup`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({email, password})
-    })
-    .then(this._checkResponse);
-  }
-
-  authorize(email, password) {
-    return fetch(`${this._authUrl}/signin`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({email, password})
-    })
-    .then(this._checkResponse)
-      .then((data) => {
-        if (data.token) {
-          localStorage.setItem('jwt', data.token);
-          return data;
-        }
-      })
-  }
-
-  getUserContent(token) {
-    return fetch(`${this._authUrl}/users/me`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      }
-    })
-    .then(this._checkResponse);
-  }
 }
 
 const api = new Api({
   baseUrl: 'https://mesto.nomoreparties.co/v1/cohort-69',
-  authUrl: 'https://auth.nomoreparties.co',
   headers: {
     authorization: '39c56915-9550-44c8-84ed-160de228f283',
     'Content-Type': 'application/json'

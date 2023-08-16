@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../utils/api';
+import auth from '../utils/auth';
 import Header from '../components/Header';
 import Main from '../components/Main';
 import Footer from '../components/Footer';
@@ -22,7 +23,7 @@ function App() {
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false)
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false)
   const [selectedCard, setSelectedCard] = useState({})
-  const [isImagePopup, setImagePopup] = useState(false)
+  const [isImagePopupOpen, setImagePopupOpen] = useState(false)
 
   const [currentUser, setCurrentUser] = useState({})
   const [userEmail, setUserEmail] = useState("")
@@ -48,10 +49,10 @@ function App() {
 
   function handleCardClick(card) {
     setSelectedCard(card)
-    setImagePopup(true)
+    setImagePopupOpen(true)
   }
 
-  function handleInfoTooltipClick() {
+  function openInfoTooltip() {
     setIsInfoTooltipOpen(true);
   }
 
@@ -59,7 +60,7 @@ function App() {
     setIsEditAvatarPopupOpen(false)
     setIsEditProfilePopupOpen(false)
     setIsAddPlacePopupOpen(false)
-    setImagePopup(false)
+    setImagePopupOpen(false)
     setIsInfoTooltipOpen(false)
   }
 
@@ -81,8 +82,8 @@ function App() {
 
   const handleCardDelete = (card) => {
     api.deleteCard(card._id)
-    .then((newCard) => {
-      setCards((state) => state.filter((c) => c._id === card._id ? "" : newCard));
+    .then(() => {
+      setCards((state) => state.filter((c) => c._id !== card._id));
     })
     .catch(err => console.log(err));
   };
@@ -116,23 +117,23 @@ function App() {
 
   useEffect(() => {
     if (isLoggedIn) {
-    Promise.all([api.getUserInfo(), api.getInitialCards()])
-    .then(([dataUser, dataCard]) => {
-      dataCard.forEach(element => element.myid = dataUser._id);
-      setCards(dataCard);
-      setCurrentUser(dataUser);
-    })
-    .catch((err) => console.log(err))}
+      Promise.all([api.getUserInfo(), api.getInitialCards()])
+        .then(([dataUser, dataCard]) => {
+          // dataCard.forEach(element => element.myid = dataUser._id);
+          setCards(dataCard);
+          setCurrentUser(dataUser);
+        })
+        .catch((err) => console.log(err))}
   }, [isLoggedIn]);
 
   useEffect(() => {
-    tokenCheck();
+    checkToken();
   }, [])
 
-  function tokenCheck() {
+  function checkToken() {
     const jwt = localStorage.getItem('jwt');
     if (jwt) {
-      api.getUserContent(jwt)
+      auth.checkToken(jwt)
         .then((res) => {
           setIsLoggedIn(true);
           setUserEmail(res.data.email);
@@ -145,23 +146,24 @@ function App() {
   function signOut() {
     localStorage.removeItem('jwt');
     navigate('/signin');
+    isLoggedIn(false);
   }
 
   function handleRegister(email, password) {
-    api.register(email, password)
+    auth.register(email, password)
       .then((res) => {
         setIsRegistrationError(false);
-        handleInfoTooltipClick();
+        openInfoTooltip();
         navigate('/signin', {replace: true});
       })
       .catch(() => {
         setIsRegistrationError(true);
-        handleInfoTooltipClick();
+        openInfoTooltip();
       });
   }
 
   function handleLogin(email, password) {
-    api.authorize(email, password)
+    auth.authorize(email, password)
       .then(() => {
         setIsLoggedIn(true);
         setUserEmail(email);
@@ -173,37 +175,42 @@ function App() {
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
+        <Header
+          isLoggedIn={isLoggedIn}
+          userEmail={userEmail}
+          signOut={signOut}
+        />
 
-      <Routes>
-        <Route
-          path="/signup"
-          element={<Register onRegister={handleRegister} />}
-        />
-        <Route 
-          path="/signin" 
-          element={<Login onLogin={handleLogin} />} />
-        <Route
-          path="*"
-          element={<Navigate to={isLoggedIn ? "/" : "/signin"} />}
-        />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute
-              element={Main}
-              isLoggedIn={isLoggedIn}
-              onEditProfile={handleEditProfileClick}
-              onEditAvatar={handleEditAvatarClick}
-              onAddPlace={handleAddPlaceClick}
-              onCardClick={handleCardClick}
-              cards={cards}
-              onCardLike = {handleCardLike}
-              onCardDelete ={handleCardDelete}
-              onSignOut={signOut}
-            />
-          }
-        />
-      </Routes>
+        <Routes>
+          <Route
+            path="/signup"
+            element={<Register onRegister={handleRegister} />}
+          />
+          <Route 
+            path="/signin" 
+            element={<Login onLogin={handleLogin} />} />
+          <Route
+            path="*"
+            element={<Navigate to={isLoggedIn ? "/" : "/signin"} />}
+          />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute
+                element={Main}
+                isLoggedIn={isLoggedIn}
+                onEditProfile={handleEditProfileClick}
+                onEditAvatar={handleEditAvatarClick}
+                onAddPlace={handleAddPlaceClick}
+                onCardClick={handleCardClick}
+                cards={cards}
+                onCardLike = {handleCardLike}
+                onCardDelete ={handleCardDelete}
+                signOut={signOut}
+              />
+            }
+          />
+        </Routes>
 
         <Footer />
 
@@ -230,7 +237,7 @@ function App() {
           onSubmit={handleCardDelete}>
         </PopupWithForm>
 
-        <ImagePopup card={selectedCard} isOpen={isImagePopup} onClose={closeAllPopups} />
+        <ImagePopup card={selectedCard} isOpen={isImagePopupOpen} onClose={closeAllPopups} />
 
         <InfoTooltip
           isOpen={isInfoTooltipOpen}
