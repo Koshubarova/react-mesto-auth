@@ -119,7 +119,6 @@ function App() {
     if (isLoggedIn) {
       Promise.all([api.getUserInfo(), api.getInitialCards()])
         .then(([dataUser, dataCard]) => {
-          // dataCard.forEach(element => element.myid = dataUser._id);
           setCards(dataCard);
           setCurrentUser(dataUser);
         })

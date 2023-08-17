@@ -39,10 +39,6 @@ function Header({isLoggedIn, signOut, userEmail = ''}) {
               </Link>
             }
           />
-          <Route
-            path="*"
-            element={<Navigate to={isLoggedIn ? "/" : "/signin"} />}
-          />
           </Routes>
       </div>
     </header>
